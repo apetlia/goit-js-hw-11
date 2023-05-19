@@ -5,16 +5,18 @@ class Pixabay {
     this.key = key;
     this._page = 1;
     this._searchQuery = '';
-    this._totalHits = 0;
+    this._onPerPage = 15;
+    this.currentHits = 0;
+    this.totalHits = 0;
   }
 
-  getData() {
+  async getData() {
     const config = {
       method: 'get',
       baseURL: 'https://pixabay.com/api/',
       params: {
         page: this._page,
-        per_page: 99,
+        per_page: this._onPerPage,
         key: this.key,
         q: this._searchQuery,
         image_type: 'photo',
@@ -23,7 +25,8 @@ class Pixabay {
       },
     };
 
-    return axios(config);
+    this.currentHits = this.page * this.perPage;
+    return await axios(config);
   }
 
   get page() {
@@ -34,11 +37,22 @@ class Pixabay {
     this._page = newPage;
   }
 
+  get perPage() {
+    return this._onPerPage;
+  }
+
+  set perPage(newPerPage) {
+    this._onPerPage = newPerPage;
+  }
+
   get query() {
     return this._searchQuery;
   }
   set query(newQuery) {
     this._searchQuery = newQuery;
+    this.currentHits = 0;
+    this.totalHits = 0;
+    this._page = 1;
   }
 }
 

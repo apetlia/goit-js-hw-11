@@ -1,9 +1,14 @@
 @import 'bootstrap/scss/bootstrap';
 
+// :root {
+//   scroll-behavior: smooth;
+// }
+
 img {
+  display: block;
   width: 100%;
-  object-fit: contain;
-  object-position: center;
+  height: 100%;
+  object-fit: cover;
 }
 
 .section {
@@ -22,7 +27,7 @@ img {
 
 .search-form {
   width: 500px;
-  // margin-bottom: 20px;
+  border-radius: 0.375rem;
 }
 
 .rounded-right {
@@ -32,19 +37,36 @@ img {
 .gallery {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  // margin-bottom: 20px;
+  gap: 15px;
+
+  a {
+    width: calc(100% / 3 - 15px);
+
+    text-decoration: none;
+    transition: all 200ms;
+    overflow: hidden;
+    border-radius: 0.375rem;
+    // box-shadow: 0px 0px 10px 5px rgba(165, 165, 165, 0.614);
+
+    &:hover {
+      transform: scale(1.1);
+      z-index: 1;
+    }
+  }
 }
 
 .photo-card {
-  width: calc(100% / 2 - 10px);
-}
+  &__info {
+    display: flex;
+    justify-content: space-around;
+    color: #343a40;
+  }
 
-.info {
-  display: flex;
-  justify-content: space-around;
-
-  &-item {
+  &__item {
     text-align: center;
+  }
+
+  &__thumb {
+    height: 200px;
   }
 }
