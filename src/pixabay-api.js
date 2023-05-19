@@ -5,7 +5,7 @@ class Pixabay {
     this.key = key;
     this._page = 1;
     this._searchQuery = '';
-    this._onPerPage = 15;
+    this._onPerPage = 20;
     this.currentHits = 0;
     this.totalHits = 0;
   }

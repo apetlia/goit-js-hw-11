@@ -1,8 +1,7 @@
-import * as bootstrap from 'bootstrap';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import Pixabay from './pixabay-api';
 import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
+import throttle from 'lodash.throttle';
 
 import refs from './refs';
 
@@ -11,12 +10,10 @@ const gallery = new SimpleLightbox('.gallery a');
 
 refs.form.addEventListener('submit', onFormSubmit);
 
-refs.btnLoadMore.addEventListener('click', onButtonLoadMoreClick);
-
 async function onFormSubmit(evt) {
   evt.preventDefault();
-  refs.btnLoadMore.hidden = true;
   clearGallaryContainer();
+  refs.endResults.hidden = true;
 
   const searchQuery = evt.currentTarget.elements.searchQuery.value.trim();
   pixabay.query = searchQuery;
@@ -25,23 +22,23 @@ async function onFormSubmit(evt) {
     await getPixabayDataAndUpdateUI();
 
     Notify.success(`Hooray! We found ${pixabay.totalHits} images.`);
-    refs.btnLoadMore.hidden = false;
+    window.addEventListener('scroll', infinityScroll);
   } catch (error) {
     onErrorOccurred(error);
   }
 }
 
-async function onButtonLoadMoreClick() {
+async function getNextPixabayData() {
   if (pixabay.currentHits > pixabay.totalHits) {
     Notify.info("We're sorry, but you've reached the end of search results.");
+    window.removeEventListener('scroll', infinityScroll);
+    refs.endResults.hidden = false;
 
-    refs.btnLoadMore.hidden = true;
     return;
   }
 
-  pixabay.page += 1;
-
   try {
+    pixabay.page += 1;
     await getPixabayDataAndUpdateUI();
   } catch (error) {
     onErrorOccurred(error);
@@ -53,7 +50,6 @@ function onErrorOccurred(err) {
 }
 
 function checkResponse(res) {
-  console.log(res);
   if (res.data.totalHits === 0) {
     Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.'
@@ -116,21 +112,18 @@ function clearGallaryContainer() {
   refs.galleryDiv.innerHTML = '';
 }
 
-function scroll() {
-  const { height: cardHeight } = document
-    .querySelector('.gallery')
-    .firstElementChild.getBoundingClientRect();
-
-  window.scrollBy({
-    top: cardHeight * 2,
-    behavior: 'smooth',
-  });
-}
-
 async function getPixabayDataAndUpdateUI() {
   const response = await pixabay.getData();
   const data = checkResponse(response);
   refs.galleryDiv.insertAdjacentHTML('beforeend', createCardsMarkup(data));
   gallery.refresh();
-  scroll();
 }
+
+const infinityScroll = throttle(() => {
+  let res =
+    window.pageYOffset + 2 * window.innerHeight >= document.body.offsetHeight;
+
+  if (res) {
+    getNextPixabayData();
+  }
+}, 500);
